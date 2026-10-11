@@ -24,7 +24,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'my_node = my_package.my_node:main'
+            'first_node = my_package.first_node:main',
+            'second_node = my_package.second_node:main',
+            'third_node = my_package.third_node:main',
         ],
     },
 )
