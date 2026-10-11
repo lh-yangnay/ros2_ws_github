@@ -27,6 +27,7 @@ setup(
             'first_node = my_package.first_node:main',
             'second_node = my_package.second_node:main',
             'third_node = my_package.third_node:main',
+            'hello_node = my_package.hello_node:main',
         ],
     },
 )
