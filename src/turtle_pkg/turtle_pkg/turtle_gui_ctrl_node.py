@@ -1,5 +1,6 @@
 import sys
 import threading
+from math import radians
 
 import rclpy
 from rclpy.node import Node
@@ -35,8 +36,8 @@ class TurtleCtrlWindow(QWidget):
         self.linear_spin_.setSingleStep(0.5)
 
         self.angular_spin_ = QDoubleSpinBox()
-        self.angular_spin_.setRange(-10.0, 10.0)
-        self.angular_spin_.setSingleStep(0.5)
+        self.angular_spin_.setRange(-180.0, 180.0)
+        self.angular_spin_.setSingleStep(10.0)
 
         send_btn = QPushButton('发送')
         send_btn.clicked.connect(self.on_send)
@@ -51,7 +52,7 @@ class TurtleCtrlWindow(QWidget):
 
     def on_send(self):
         self.node_.send_command(self.linear_spin_.value(),
-                                self.angular_spin_.value())
+                                radians(self.angular_spin_.value()))
 
 
 def main():
