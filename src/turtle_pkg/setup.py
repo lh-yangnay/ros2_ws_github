@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'turtle_ctrl_node = turtle_pkg.turtle_ctrl_node:main'
+            'turtle_ctrl_node = turtle_pkg.turtle_ctrl_node:main',
+            'turtle_gui_ctrl_node = turtle_pkg.turtle_gui_ctrl_node:main'
         ],
     },
 )
