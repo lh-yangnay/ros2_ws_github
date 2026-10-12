@@ -21,21 +21,14 @@ class TurtleAdvceCtrlNode(Node):
             Pose, '/turtle1/pose', self.pose_callback, 10)
         self.pose = None
         self.pose_listener = None
-        self.last_linear_ = 0.0
-        self.last_angular_ = 0.0
-        self.timer_ = self.create_timer(0.1, self.publish_last_command)
         self.get_logger().info('小乌龟高级控制器节点已启动.')
 
     def send_command(self, linear, angular):
-        self.last_linear_ = linear
-        self.last_angular_ = angular
-        self.get_logger().info(f'已更新速度指令: 线速度={linear}, 角速度={angular}')
-
-    def publish_last_command(self):
         msg = Twist()
-        msg.linear.x = self.last_linear_
-        msg.angular.z = self.last_angular_
+        msg.linear.x = linear
+        msg.angular.z = angular
         self.publisher_.publish(msg)
+        self.get_logger().info(f'已发送速度指令: 线速度={linear}, 角速度={angular}')
 
     def pose_callback(self, msg):
         self.pose = msg
@@ -63,7 +56,7 @@ class TurtleCtrlWindow(QWidget):
         self.linear_spin_.setSingleStep(0.5)
 
         self.angular_spin_ = QDoubleSpinBox()
-        self.angular_spin_.setRange(-sys.float_info.max, sys.float_info.max)
+        self.angular_spin_.setRange(-3600.0, 3600.0)
         self.angular_spin_.setSingleStep(10.0)
 
         send_btn = QPushButton('发送')
