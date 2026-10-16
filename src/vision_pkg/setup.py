@@ -26,7 +26,8 @@ setup(
         'console_scripts': [
             'camera_native_node = vision_pkg.camera_native_node:main',
             'hsv_image_node = vision_pkg.hsv_image_node:main',
-            'box_detect_node = vision_pkg.box_detect_node:main'
+            'box_detect_node = vision_pkg.box_detect_node:main',
+            'box_tf_node = vision_pkg.box_tf_node:main'
         ],
     },
 )
