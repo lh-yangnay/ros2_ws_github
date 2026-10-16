@@ -46,7 +46,7 @@ def demo_tts():
     # 4. 保存音频到文件
     print("\n4. 保存音频文件测试...")
     save_text = "这段音频已经被保存到了文件中。"
-    output_file = "tts_output.mp3"
+    output_file = "tts_output.wav"
     engine.save_to_file(save_text, output_file)
     print(f"正在保存到 {output_file}...")
     

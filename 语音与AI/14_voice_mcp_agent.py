@@ -1,6 +1,15 @@
 import asyncio
 import sys
 import os
+import shutil
+
+# 修复：Trae 终端会把自带的精简版 ffmpeg（不支持 wav 解码）放到 PATH 最前，
+# 这里强制优先使用系统完整版 ffmpeg
+_sys_ffmpeg = shutil.which("ffmpeg", path="/usr/bin:/bin")
+if _sys_ffmpeg:
+    os.environ["PATH"] = (os.path.dirname(_sys_ffmpeg)
+                          + os.pathsep + os.environ.get("PATH", ""))
+
 import pyaudio
 import wave
 import threading
@@ -19,7 +28,7 @@ RATE = 16000
 WAVE_OUTPUT_FILENAME = "input_command.wav"
 
 # Whisper 配置
-WHISPER_MODEL_TYPE = "large"
+WHISPER_MODEL_TYPE = "base"
 
 # DeepSeek 配置
 API_KEY = 'sk-a80719c8b9cc4c708195d7f84fdd4a70'
@@ -106,7 +115,7 @@ async def run_agent():
     # 定义 MCP Server 连接参数
     print(f"准备连接 MCP Server: {MCP_SERVER_SCRIPT}")
     server_params = StdioServerParameters(
-        command="python",
+        command=sys.executable,
         args=[MCP_SERVER_SCRIPT],
         env=None
     )
@@ -129,7 +138,7 @@ async def run_agent():
                     "function": {
                         "name": tool.name,
                         "description": tool.description,
-                        "parameters": tool.inputSchema
+                        "parameters": tool.input_schema
                     }
                 })
                 print(f" - 已注册工具: {tool.name}")

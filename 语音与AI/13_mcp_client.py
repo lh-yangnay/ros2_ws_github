@@ -11,9 +11,9 @@ async def run_client():
     # 获取当前工作目录下的 server 脚本路径
     server_script = os.path.join(os.getcwd(), "12_mcp_server_fastmcp.py")
     
-    # 定义服务器启动参数
+    # 定义服务器启动参数（用当前 Python 解释器，兼容无 python 命令的 Linux）
     server_params = StdioServerParameters(
-        command="python", 
+        command=sys.executable,
         args=[server_script],
         env=None
     )

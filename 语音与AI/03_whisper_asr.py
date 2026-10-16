@@ -1,9 +1,18 @@
-import whisper
 import os
+import shutil
+
+# 修复：Trae 终端会把自带的精简版 ffmpeg（不支持 wav 解码）放到 PATH 最前，
+# 这里强制优先使用系统完整版 ffmpeg（/usr/bin/ffmpeg）
+_sys_ffmpeg = shutil.which("ffmpeg", path="/usr/bin:/bin")
+if _sys_ffmpeg:
+    os.environ["PATH"] = (os.path.dirname(_sys_ffmpeg)
+                          + os.pathsep + os.environ.get("PATH", ""))
+
+import whisper
 
 # 配置参数
 AUDIO_FILE = "output.wav"
-MODEL_TYPE = "large"  # 可选: tiny, base, small, medium, large
+MODEL_TYPE = "base"  # 可选: tiny, base, small, medium, large
 
 def transcribe_audio():
     # 检查文件是否存在

@@ -3,10 +3,20 @@ import wave
 import threading
 import time
 import os
+import shutil
+
+# 修复：Trae 终端会把自带的精简版 ffmpeg（不支持 wav 解码）放到 PATH 最前，
+# 这里强制优先使用系统完整版 ffmpeg
+_sys_ffmpeg = shutil.which("ffmpeg", path="/usr/bin:/bin")
+if _sys_ffmpeg:
+    os.environ["PATH"] = (os.path.dirname(_sys_ffmpeg)
+                          + os.pathsep + os.environ.get("PATH", ""))
+
 import whisper
 import asyncio
 import edge_tts
 import sys
+import subprocess
 from openai import OpenAI
 
 # ----------------- 配置参数 -----------------
@@ -130,11 +140,26 @@ async def text_to_speech(text):
         communicate = edge_tts.Communicate(text, TTS_VOICE, rate=TTS_RATE, volume=TTS_VOLUME)
         await communicate.save(TTS_OUTPUT_FILE)
         print(f"语音已生成: {TTS_OUTPUT_FILE}")
-        
-        # 自动播放 (Windows)
-        if sys.platform.startswith('win'):
-            print("开始播放回复...")
-            os.startfile(TTS_OUTPUT_FILE)
+
+        # 自动播放（跨平台）
+        print("开始播放回复...")
+        try:
+            if sys.platform.startswith('win'):
+                os.startfile(TTS_OUTPUT_FILE)
+            elif sys.platform == 'darwin':
+                subprocess.run(['afplay', TTS_OUTPUT_FILE], check=False)
+            else:
+                # Linux：优先 ffplay，其次 aplay（aplay 不支持 mp3，做回退提示）
+                if shutil.which('ffplay'):
+                    subprocess.run(
+                        ['ffplay', '-nodisp', '-autoexit', TTS_OUTPUT_FILE],
+                        check=False,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL)
+                else:
+                    print("未找到 ffplay，请手动播放该文件")
+        except Exception as pe:
+            print(f"播放失败: {pe}")
     except Exception as e:
         print(f"TTS 生成出错: {e}")
 
