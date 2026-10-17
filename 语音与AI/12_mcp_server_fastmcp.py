@@ -1,101 +1,52 @@
+"""
+MCP Server 最小示例（stdio 版）
+================================
+
+【运行流程】
+1. 本脚本不单独交互运行 —— stdio 模式下启动后会静默等待协议消息（看起来像"卡住"），
+   它是给客户端当子进程拉起的，不是给人用的。
+2. 验证方式：运行客户端  python3 13_mcp_client.py
+   流程：客户端以子进程启动本脚本 → 通过 stdin/stdout 管道收发 JSON-RPC
+        → 发现工具列表（add） → 调用 add(10, 20) → 返回 30
+3. 可选：以网络服务方式运行（会出现真实网址）
+   ~/.local/bin/fastmcp run 12_mcp_server_fastmcp.py --transport http
+   → http://127.0.0.1:8000/mcp
+   注意：http 模式下 13/14 号 stdio 客户端无法连接。
+"""
 import sys
 from fastmcp import FastMCP
 
-# 1. 创建 MCP Server 实例
-# "Math Server" 是服务的名称
+# ==================== 1. 创建 MCP 实例 ====================
+# "Math Server" 是服务名称，客户端连接时可见
 mcp = FastMCP("Math Server")
 
 
 def log(*args):
-    """日志统一输出到 stderr（stdio 协议下 stdout 只能传 JSON-RPC）"""
+    """日志统一输出到 stderr（stdio 协议下 stdout 只能传 JSON-RPC 消息）"""
     print(*args, file=sys.stderr)
 
-# 2. 定义工具 (Tool)
-# @mcp.tool() 装饰器会将函数注册为 MCP 工具
-# 类型提示 (Type Hints) 和文档字符串 (Docstrings) 非常重要，
-# 它们会被转换为工具的 Schema 供 LLM 理解
+
+# ==================== 2. 提供 add 工具 ====================
+# @mcp.tool() 把函数注册为 MCP 工具
+# 类型提示 + 文档字符串会自动转换成工具 Schema，供大模型理解何时调用、如何传参
 @mcp.tool()
 def add(a: int, b: int) -> int:
     """
     计算两个整数的和 (Add two integers)
-    
+
     Args:
         a: 第一个加数
         b: 第二个加数
-        
+
     Returns:
         两数之和
     """
     result = a + b
-    log(f"Executing add({a}, {b}) -> {result}") # 日志会输出到 stderr
+    log(f"Executing add({a}, {b}) -> {result}")
     return result
 
-@mcp.tool()
-def subtract(a: int, b: int) -> int:
-    """
-    计算两个整数的差 (Subtract two integers)
-    
-    Args:
-        a: 被减数
-        b: 减数
-        
-    Returns:
-        两数之差 (a - b)
-    """
-    result = a - b
-    log(f"Executing subtract({a}, {b}) -> {result}")
-    return result
 
-@mcp.tool()
-def multiply(a: int, b: int) -> int:
-    """
-    计算两个整数的积 (Multiply two integers)
-    
-    Args:
-        a: 第一个乘数
-        b: 第二个乘数
-        
-    Returns:
-        两数之积
-    """
-    result = a * b
-    log(f"Executing multiply({a}, {b}) -> {result}")
-    return result
-
-@mcp.tool()
-def divide(a: int, b: int) -> float:
-    """
-    计算两个整数的商 (Divide two integers)
-    
-    Args:
-        a: 被除数
-        b: 除数 (不能为0)
-        
-    Returns:
-        两数之商
-    """
-    if b == 0:
-        raise ValueError("Cannot divide by zero")
-    result = a / b
-    log(f"Executing divide({a}, {b}) -> {result}")
-    return result
-
-@mcp.tool()
-def robot_nod() -> str:
-    """
-    控制机械臂执行点头动作 (Make the robot arm nod)
-    此工具不接受参数，仅执行预设的动作序列。
-    
-    Returns:
-        执行结果消息
-    """
-    log("Executing robot_nod()...")
-    log("LOG: Robot Arm Moving: Position 0 -> Position 1 (Nod Down)")
-    log("LOG: Robot Arm Moving: Position 1 -> Position 0 (Nod Up)")
-    return "Robot arm nodded successfully."
-
-# 3. 运行 Server
-# 默认情况下，mcp.run() 会使用 stdio 传输协议
+# ==================== 3. 运行 Server ====================
 if __name__ == "__main__":
-    print("MCP Server is running...", file=sys.stderr)
-    mcp.run()
+    log("MCP Server is running...")
+    mcp.run()  # 默认 stdio 传输：等待客户端拉起并通信
